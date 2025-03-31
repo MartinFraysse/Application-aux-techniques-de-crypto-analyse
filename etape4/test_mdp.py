@@ -2,7 +2,7 @@ import requests
 
 
 
-url = "http://127.0.0.1:5000/check"
+url = "http://10.0.2.15:5000/check"
 
 json = {
     "password": 'Gaaaa'
