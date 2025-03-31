@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # Configuration UART (à adapter selon votre matériel)
 SERIAL_PORT = '/dev/ttyUSB0'
-BAUD_RATE = 9600
+BAUD_RATE = 115200
 MAX_PASS_LENGTH = 16
 
 def check_password(candidate):
