@@ -1,4 +1,5 @@
 import serial
+import time
 
 SERIAL_PORT = '/dev/ttyUSB0'
 BAUD_RATE = 115200
@@ -6,16 +7,17 @@ BAUD_RATE = 115200
 
 def test(mdp: str):
     try:
-        with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1) as ser:
+        with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=2) as ser:
             # Envoyer le mot de passe candidat
-            ser.write('U ' + mdp.encode() + b'\n')
-            # Attendre la réponse (suppose que la cible renvoie '1' pour vrai, '0' pour faux)
-            response = ser.readline().decode().strip()
-            print(response)
-            return response
+            ser.write(b'U ' + mdp.encode() + b'\n')
+            response = ser.readlines()
+            if response[2].decode() == "[-]   Sorry, try again":
+                return {"Valid": False, "time": response[1].decode()}
+            else:
+                return {"Valid": True, "time": response[1].decode()}
     except serial.SerialException as e:
         print(f"Erreur UART: {e}")
         return False
     
 
-test('test')
+test(input('U '))

@@ -10,18 +10,16 @@ SERIAL_PORT = '/dev/ttyUSB0'
 BAUD_RATE = 115200
 MAX_PASS_LENGTH = 16
 
-def check_password(candidate):
-    """
-    Vérifie le mot de passe via UART et retourne vrai ou faux
-    Simule la temporisation côté cible
-    """
+def test(mdp: str):
     try:
-        with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1) as ser:
+        with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=2) as ser:
             # Envoyer le mot de passe candidat
-            ser.write(candidate.encode() + b'\n')
-            # Attendre la réponse (suppose que la cible renvoie '1' pour vrai, '0' pour faux)
-            response = ser.readline().decode().strip()
-            return response == '1'
+            ser.write(b'U ' + mdp.encode() + b'\n')
+            response = ser.readlines()
+            if response[2].decode() == "[-]   Sorry, try again":
+                return {"Valid": False, "time": response[1].decode()}
+            else:
+                return {"Valid": True, "time": response[1].decode()}
     except serial.SerialException as e:
         print(f"Erreur UART: {e}")
         return False
@@ -44,7 +42,7 @@ def api_check_password():
         })
     
     # Vérification avec temporisation côté cible
-    result = check_password(candidate)
+    result = test(candidate)
     
     return jsonify({
         'status': 'success',
