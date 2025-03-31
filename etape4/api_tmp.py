@@ -1,5 +1,4 @@
-import serial
-import time
+import random
 from flask import Flask, request, jsonify
 
 # Initialisation de l'API Flask
@@ -9,8 +8,10 @@ MAX_PASS_LENGTH = 16
 
 MDP = open('etape4/mdp.txt','r').read()
 
-
 def check_password(mp):
+    temps = 0
+    tmp_mdp = MDP
+    tmp_mp = mp
     if len(mp) > len(MDP):
         tmp_mdp = MDP + ('*' * (len(mp) - len(MDP)))
         tmp_mp = mp
@@ -18,11 +19,10 @@ def check_password(mp):
         tmp_mp = mp + ('*' * (len(MDP) - len(mp)))
         tmp_mdp = MDP
     for i, j in zip(tmp_mp, tmp_mdp):
-        time.sleep(0.5)
-        print(i,j )
+        temps += random.randint(40, 60)
         if i != j:
-            return False
-    return True
+            return {"Valid": False, "time": temps}
+    return {"Valid": True, "time": temps}
 
 # Route API pour vérifier un mot de passe
 @app.route('/check', methods=['POST'])

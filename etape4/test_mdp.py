@@ -2,16 +2,18 @@ import requests
 
 
 
-url = "http://10.0.2.15:5000/check"
-
-json = {
-    "password": 'Gaaaa'
-}
+url = "http://127.0.0.1:5000/check"
 
 
-res = requests.post(url=url, json=json, verify=False)
+while 1:
+    json = {
+        "password": input('- ')
+    }
 
-if res.status_code == 200:
-    print(res.json())
-else:
-    print(res.text)
+
+    res = requests.post(url=url, json=json, verify=False)
+
+    if res.status_code == 200:
+        print(res.json())
+    else:
+        print(res.text)
