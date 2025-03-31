@@ -11,13 +11,13 @@ def test(mdp: str):
             # Envoyer le mot de passe candidat
             ser.write(b'U ' + mdp.encode() + b'\n')
             response = ser.readlines()
-            if response[2].decode() == "[-]   Sorry, try again":
-                return {"Valid": False, "time": response[1].decode()}
+            if "[-]   Sorry, try again" in response[2].decode():
+                return {"Valid": False, "time": response[1].decode()[25:-2]}
             else:
-                return {"Valid": True, "time": response[1].decode()}
+                return {"Valid": True, "time": response[1].decode()[25:-2]}
     except serial.SerialException as e:
         print(f"Erreur UART: {e}")
         return False
     
 
-test(input('U '))
+print(test(input('U ')))
