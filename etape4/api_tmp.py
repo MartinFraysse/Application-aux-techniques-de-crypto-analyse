@@ -11,7 +11,7 @@ MDP = open('etape4/mdp.txt').write()
 
 
 def check_password(candidate):
-    
+    pass
 
 # Route API pour vérifier un mot de passe
 @app.route('/check', methods=['POST'])
