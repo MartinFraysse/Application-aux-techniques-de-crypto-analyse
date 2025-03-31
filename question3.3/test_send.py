@@ -18,4 +18,4 @@ def test(mdp: str):
         return False
     
 
-test()
+test('test')
