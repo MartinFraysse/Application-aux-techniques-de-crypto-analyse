@@ -7,11 +7,22 @@ app = Flask(__name__)
 
 MAX_PASS_LENGTH = 16
 
-MDP = open('etape4/mdp.txt').write()
+MDP = open('etape4/mdp.txt','r').read()
 
 
-def check_password(candidate):
-    pass
+def check_password(mp):
+    if len(mp) > len(MDP):
+        tmp_mdp = MDP + ('*' * (len(mp) - len(MDP)))
+        tmp_mp = mp
+    elif len(mp) < len(MDP):
+        tmp_mp = mp + ('*' * (len(MDP) - len(mp)))
+        tmp_mdp = MDP
+    for i, j in zip(tmp_mp, tmp_mdp):
+        time.sleep(0.5)
+        print(i,j )
+        if i != j:
+            return False
+    return True
 
 # Route API pour vérifier un mot de passe
 @app.route('/check', methods=['POST'])

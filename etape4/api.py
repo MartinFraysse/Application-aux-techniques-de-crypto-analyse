@@ -21,7 +21,6 @@ def check_password(candidate):
             ser.write(candidate.encode() + b'\n')
             # Attendre la réponse (suppose que la cible renvoie '1' pour vrai, '0' pour faux)
             response = ser.readline().decode().strip()
-            print(response)
             return response == '1'
     except serial.SerialException as e:
         print(f"Erreur UART: {e}")
