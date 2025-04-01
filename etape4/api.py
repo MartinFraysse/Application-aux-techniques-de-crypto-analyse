@@ -1,5 +1,5 @@
 import serial
-import time
+import random
 from flask import Flask, request, jsonify
 
 # Initialisation de l'API Flask
@@ -10,7 +10,7 @@ SERIAL_PORT = '/dev/ttyUSB0'
 BAUD_RATE = 115200
 MAX_PASS_LENGTH = 16
 
-def test(mdp: str):
+def check_password(mdp: str):
     try:
         with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=2) as ser:
             # Envoyer le mot de passe candidat
@@ -23,6 +23,49 @@ def test(mdp: str):
     except serial.SerialException as e:
         print(f"Erreur UART: {e}")
         return False
+
+MDP = open('etape4/mdp.txt','r').read()
+
+def test_password(mp):
+    temps = 0
+    tmp_mdp = MDP
+    tmp_mp = mp
+    if len(mp) > len(MDP):
+        tmp_mdp = MDP + ('*' * (len(mp) - len(MDP)))
+        tmp_mp = mp
+    elif len(mp) < len(MDP):
+        tmp_mp = mp + ('*' * (len(MDP) - len(mp)))
+        tmp_mdp = MDP
+    for i, j in zip(tmp_mp, tmp_mdp):
+        temps += random.randint(40, 60)
+        if i != j:
+            return {"Valid": False, "time": temps}
+    return {"Valid": True, "time": temps}
+
+# Route API pour vérifier un mot de passe
+@app.route('/test', methods=['POST'])
+def api_test_password():
+    data = request.get_json()
+    if not data or 'password' not in data:
+        return jsonify({
+            'status': 'error',
+            'message': 'Mot de passe requis dans le corps de la requête'
+        })
+    
+    candidate = data['password']
+    if len(candidate) > MAX_PASS_LENGTH:
+        return jsonify({
+            'status': 'error',
+            'message': f'Le mot de passe ne doit pas dépasser {MAX_PASS_LENGTH} caractères'
+        })
+    
+    # Vérification avec temporisation côté cible
+    result = test_password(candidate)
+    
+    return jsonify({
+        'status': 'success',
+        'result': result
+    })
 
 # Route API pour vérifier un mot de passe
 @app.route('/check', methods=['POST'])
@@ -42,7 +85,7 @@ def api_check_password():
         })
     
     # Vérification avec temporisation côté cible
-    result = test(candidate)
+    result = check_password(candidate)
     
     return jsonify({
         'status': 'success',

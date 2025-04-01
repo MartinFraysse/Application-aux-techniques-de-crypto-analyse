@@ -8,7 +8,7 @@ MAX_PASS_LENGTH = 16
 
 MDP = open('etape4/mdp.txt','r').read()
 
-def check_password(mp):
+def test_password(mp):
     temps = 0
     tmp_mdp = MDP
     tmp_mp = mp
@@ -42,7 +42,7 @@ def api_check_password():
         })
     
     # Vérification avec temporisation côté cible
-    result = check_password(candidate)
+    result = test_password(candidate)
     
     return jsonify({
         'status': 'success',
