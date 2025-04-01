@@ -10,7 +10,7 @@ SERIAL_PORT = '/dev/ttyUSB0'
 BAUD_RATE = 115200
 MAX_PASS_LENGTH = 16
 
-def check_password(mdp: str):
+def U1(mdp: str):
     try:
         with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=2) as ser:
             # Envoyer le mot de passe candidat
@@ -25,6 +25,33 @@ def check_password(mdp: str):
     except serial.SerialException as e:
         print(f"Erreur UART: {e}")
         return False
+
+# Route API pour vérifier un mot de passe
+@app.route('/check', methods=['POST'])
+def api_check_password():
+    data = request.get_json()
+    if not data or 'password' not in data:
+        return jsonify({
+            'status': 'error',
+            'message': 'Mot de passe requis dans le corps de la requête'
+        })
+    
+    candidate = data['password']
+    if len(candidate) > MAX_PASS_LENGTH:
+        return jsonify({
+            'status': 'error',
+            'message': f'Le mot de passe ne doit pas dépasser {MAX_PASS_LENGTH} caractères'
+        })
+        
+    
+    # Vérification avec temporisation côté cible
+    result = U1(candidate)
+    
+    return jsonify({
+        'status': 'success',
+        'result': result
+    })
+
 
 MDP = open('etape4/mdp.txt','r').read()
 
@@ -69,30 +96,8 @@ def api_test_password():
         'result': result
     })
 
-# Route API pour vérifier un mot de passe
-@app.route('/check', methods=['POST'])
-def api_check_password():
-    data = request.get_json()
-    if not data or 'password' not in data:
-        return jsonify({
-            'status': 'error',
-            'message': 'Mot de passe requis dans le corps de la requête'
-        })
-    
-    candidate = data['password']
-    if len(candidate) > MAX_PASS_LENGTH:
-        return jsonify({
-            'status': 'error',
-            'message': f'Le mot de passe ne doit pas dépasser {MAX_PASS_LENGTH} caractères'
-        })
-    
-    # Vérification avec temporisation côté cible
-    result = check_password(candidate)
-    
-    return jsonify({
-        'status': 'success',
-        'result': result
-    })
+
+
 
 if __name__ == '__main__':
     print("Lancement de l'API de vérification...")

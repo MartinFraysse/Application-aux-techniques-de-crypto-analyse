@@ -1,14 +1,15 @@
 import requests
 import string
+from numpy import mean
 
 
 class OnEstDesBrutes:
     car = string.ascii_letters + string.digits
 
     def __init__(self):
-        self.password = 'GuardiaR0ck'
-        self.url = "http://192.168.137.146:5000/check"
+        self.password = 'GuardiaR0cks'
         self.last_time = 150
+        self.url = "http://192.168.137.146:5000/check"
 
     def request(self, letter: str):
         json = {
@@ -26,7 +27,10 @@ class OnEstDesBrutes:
     
     def max_time(self, temps: list[int]) -> int | None:
         i = temps.index(max(temps))
-        if temps[i] > temps[i - 1] + 15:
+        if len(temps) < 2:
+            return
+        tmp_mean = mean(temps[:i] + temps[i+1:])
+        if temps[i] > tmp_mean + 15:
             return i
         
     def brut_force_l(self) -> None:
