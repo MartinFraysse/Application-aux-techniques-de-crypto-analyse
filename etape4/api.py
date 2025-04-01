@@ -16,6 +16,8 @@ def check_password(mdp: str):
             # Envoyer le mot de passe candidat
             ser.write(b'U ' + mdp.encode() + b'\n')
             response = ser.readlines()
+            for i in response:
+                print(i.decode())
             if "[-]   Sorry, try again" in response[2].decode():
                 return {"Valid": False, "time": response[1].decode()[25:-2]}
             else:
