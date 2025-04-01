@@ -10,7 +10,6 @@ while 1:
         "password": input('- ')
     }
 
-
     res = requests.post(url=url, json=json, verify=False)
 
     if res.status_code == 200:
