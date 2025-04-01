@@ -4,7 +4,7 @@ import requests
 url = "http://192.168.137.146:5000/level"
 
 json = {
-    "level": input('- ')
+    "level": input('Level - ')
 }
 
 res = requests.post(url=url, json=json, verify=False)
@@ -19,7 +19,7 @@ url = "http://192.168.137.146:5000/check"
 
 while 1:
     json = {
-        "password": input('- ')
+        "password": input('Password - ')
     }
 
     res = requests.post(url=url, json=json, verify=False)
