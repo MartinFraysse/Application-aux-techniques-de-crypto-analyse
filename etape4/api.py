@@ -1,5 +1,6 @@
 import serial
 import random
+import time
 from flask import Flask, request, jsonify
 
 # Initialisation de l'API Flask
