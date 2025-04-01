@@ -41,7 +41,7 @@ def change_level(level: str):
 
 # Route API pour vérifier un mot de passe
 @app.route('/level', methods=['POST'])
-def api_check_password():
+def api_level():
     data = request.get_json()
     level: str = data.get('level', '0')
     if not data or 'level' not in data or not level.isdigit():
