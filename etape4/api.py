@@ -33,6 +33,8 @@ def change_level(level: str):
             # Envoyer le mot de passe candidat
             ser.write(b'L ' + level.encode() + b'\n')
             response = ser.readlines()
+            for i in response:
+                print(i.decode())
             if 'Not a valid level' in response[1].decode():
                 return False
             return True
