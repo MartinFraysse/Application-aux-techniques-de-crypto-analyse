@@ -13,7 +13,7 @@ MAX_PASS_LENGTH = 16
 
 def U0(mdp: str):
     try:
-        with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=2) as ser:
+        with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1.3) as ser:
             # Envoyer le mot de passe candidat
             ser.write(b'U ' + mdp.encode() + b'\n')
             response = ser.readlines()
@@ -29,7 +29,7 @@ def U0(mdp: str):
 
 def change_level(level: str):
     try:
-        with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=2) as ser:
+        with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1.3) as ser:
             # Envoyer le mot de passe candidat
             ser.write(b'L ' + level.encode() + b'\n')
             response = ser.readlines()

