@@ -51,7 +51,7 @@ class OnEstDesBrutesGUI:
         self.log_text.grid(row=6, column=0, pady=10)
         
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
-
+    
     def log(self, message):
         self.log_text.insert(tk.END, message + "\n")
         self.log_text.see(tk.END)
@@ -90,11 +90,11 @@ class OnEstDesBrutesGUI:
         self.log(f'Longueur password: {self.password_len}\n')
 
     def max_time(self, temps: list[int]) -> int | None:
+        i = temps.index(max(temps))
         tmp_mean = mean((temps[:i] + temps[i+1:]) or [0])
         self.mean_time_label.config(text=f"Moyenne des temps: {tmp_mean}")
         if len(temps) < 4:
             return None
-        i = temps.index(max(temps))
         if temps[i] > tmp_mean + 15:
             return i
 
