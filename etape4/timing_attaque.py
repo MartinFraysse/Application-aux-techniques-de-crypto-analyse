@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import ttk
 from numpy import mean
 import threading
+import argparse
 
 class TimingAttackGUI:
     """Interface graphique pour une attaque par temporisation sur un mot de passe."""
@@ -22,7 +23,7 @@ class TimingAttackGUI:
         
         # Initialisation de l'interface graphique
         self.root = tk.Tk()
-        self.root.title("Timing Attack")
+        self.root.title(f"Timing Attack - Level {self.level}")
         self.root.geometry("600x400")
         
         # Frame principale
@@ -165,9 +166,16 @@ class TimingAttackGUI:
         self.root.mainloop()
 
 if __name__ == "__main__":
-    niveau = '2'
-    occurrence = 4
-    password = ''
+    parser = argparse.ArgumentParser(description='Traitement des arguments.')
+    parser.add_argument('--level', type=int, required=True, help='Niveau (doit être un int)', default=0)
+    parser.add_argument('--occurrence', type=int, required=False, help='Occurrence de chaque caractère (doit être un int)', default=1)
+    parser.add_argument('--password', type=str, required=False, help='Mot de passe (doit être un str)', default='')
+
+    args = parser.parse_args()
+
+    niveau = str(args.level)
+    occurrence = args.occurrence
+    password = args.password
 
     app = TimingAttackGUI(level=niveau, occ=occurrence, password=password)
     app.run()
