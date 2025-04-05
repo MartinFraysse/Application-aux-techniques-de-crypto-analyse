@@ -1,5 +1,4 @@
 import serial
-import time
 
 SERIAL_PORT = '/dev/ttyUSB0'
 BAUD_RATE = 115200

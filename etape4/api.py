@@ -1,20 +1,18 @@
 import serial
-import random
-import time
 from flask import Flask, request, jsonify
 
 # Initialisation de l'API Flask
 app = Flask(__name__)
 
-# Configuration UART (à adapter selon votre matériel)
+# Configuration UART
 SERIAL_PORT = '/dev/ttyUSB0'
 BAUD_RATE = 115200
 MAX_PASS_LENGTH = 16
 
-def U0(mdp: str):
+def U(mdp: str):
     try:
         with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1.3) as ser:
-            # Envoyer le mot de passe candidat
+            # Envoyer le mot de passe testé
             ser.write(b'U ' + mdp.encode() + b'\n')
             response = ser.readlines()
             for i in response:
@@ -27,10 +25,10 @@ def U0(mdp: str):
         print(f"Erreur UART: {e}")
         return False
 
-def change_level(level: str):
+def L(level: str):
     try:
         with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1.3) as ser:
-            # Envoyer le mot de passe candidat
+            # Envoyer le level
             ser.write(b'L ' + level.encode() + b'\n')
             response = ser.readlines()
             for i in response:
@@ -42,7 +40,7 @@ def change_level(level: str):
         print(f"Erreur UART: {e}")
         return False
 
-# Route API pour vérifier un mot de passe
+# Route API pour changer de level
 @app.route('/level', methods=['POST'])
 def api_level():
     data = request.get_json()
@@ -52,12 +50,15 @@ def api_level():
             'status': 'error',
             'message': 'Level requis dans le corps de la requête'
         })
-    result = change_level(data.get('level'))
+    
+    result = L(data.get('level'))
+
     return jsonify({
         'status': 'success',
         'result': result
     })
 
+# Route API pour vérifier le mot de passe
 @app.route('/check', methods=['POST'])
 def api_check_password():
     data = request.get_json()
@@ -74,16 +75,13 @@ def api_check_password():
             'message': f'Le mot de passe ne doit pas dépasser {MAX_PASS_LENGTH} caractères'
         })
     
-    # Vérification avec temporisation côté cible
-    result = U0(candidate)
+    result = U(candidate)
     
     return jsonify({
         'status': 'success',
         'result': result
     })
 
-
-
 if __name__ == '__main__':
-    print("Lancement de l'API de vérification...")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    print("Lancement de l'API...")
+    app.run(host='0.0.0.0', port=5000)
